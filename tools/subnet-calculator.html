@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2025 BLGardner. All Rights Reserved. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Subnet & DNS Tools - Prism.Tools</title>
+  <style>
+    /* Prism.Tools Core Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0f;
+      color: #e4e4e7;
+      line-height: 1.4;
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar {
+      background: rgba(10, 10, 15, 0.98);
+      backdrop-filter: blur(12px);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #27272a;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6 0%, #2dd4bf 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    .back-link { color: #a1a1aa; text-decoration: none; font-size: 0.875rem; }
+    
+    .donate-btn {
+      padding: 0.4rem 1rem;
+      background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.875rem;
+      white-space: nowrap;
+    }
+
+    .tool-wrapper {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    .tool-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #ffffff 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .calc-section { margin-bottom: 3rem; }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #3b82f6;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .calc-container {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .input-group { margin-bottom: 1.2rem; }
+    
+    label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #71717a;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    input, select {
+      width: 100%;
+      background: #0a0a0f;
+      border: 1px solid #27272a;
+      color: #e4e4e7;
+      padding: 0.8rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input:focus { border-color: #3b82f6; }
+
+    .results-table { width: 100%; border-collapse: collapse; }
+    .results-table tr { border-bottom: 1px solid #27272a; }
+    .results-table td { padding: 0.6rem 0; }
+
+    .res-label { color: #71717a; font-size: 0.85rem; width: 45%; }
+    .res-value { font-family: monospace; color: #3b82f6; font-weight: 600; text-align: right; word-break: break-all; }
+
+    .binary-display {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: #52525b;
+      font-family: monospace;
+      word-break: break-all;
+      background: #0a0a0f;
+      padding: 0.5rem;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .calc-container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="../index.html" class="logo">PRISM.TOOLS</a>
+    <a href="https://www.paypal.com/paypalme/BLGApps" target="_blank" class="donate-btn">☕ Donate</a>
+    <a href="../index.html" class="back-link">← All Tools</a>
+  </nav>
+
+  <div class="tool-wrapper">
+    <div class="tool-header">
+      <h1>Network Toolset</h1>
+      <p style="color: #71717a;">Visual Subnetting, Transition, and DNS Records.</p>
+    </div>
+
+    <div class="calc-section">
+      <h2 class="section-title"><span>◈</span> IPv4 Subnetting</h2>
+      <div class="calc-container">
+        <div class="card">
+          <div class="input-group">
+            <label>IP Address</label>
+            <input type="text" id="ip-address" value="192.168.1.1" oninput="calculateAll()">
+          </div>
+          <div class="input-group">
+            <label>Subnet Mask / CIDR</label>
+            <select id="cidr" onchange="calculateAll()"></select>
+          </div>
+        </div>
+        <div class="card">
+          <table class="results-table">
+            <tr><td class="res-label">Network Address</td><td id="net-addr" class="res-value">-</td></tr>
+            <tr><td class="res-label">Broadcast Address</td><td id="broad-addr" class="res-value">-</td></tr>
+            <tr><td class="res-label">Usable IP Range</td><td id="ip-range" class="res-value">-</td></tr>
+            <tr><td class="res-label">Total Hosts</td><td id="total-hosts" class="res-value">-</td></tr>
+            <tr><td class="res-label">Wildcard Mask</td><td id="wildcard" class="res-value">-</td></tr>
+            <tr><td class="res-label">Reverse DNS (PTR)</td><td id="v4-ptr" class="res-value">-</td></tr>
+          </table>
+          <div id="binary-net" class="binary-display"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-section">
+      <h2 class="section-title"><span>◈</span> IPv6 Subnetting</h2>
+      <div class="calc-container">
+        <div class="card">
+          <div class="input-group">
+            <label>IPv6 Address</label>
+            <input type="text" id="ipv6-address" value="2001:db8::1" oninput="calculateAll()">
+          </div>
+          <div class="input-group">
+            <label>Prefix Length</label>
+            <select id="v6-prefix" onchange="calculateAll()"></select>
+          </div>
+        </div>
+        <div class="card">
+          <table class="results-table">
+            <tr><td class="res-label">Compressed</td><td id="v6-compressed" class="res-value">-</td></tr>
+            <tr><td class="res-label">Network Prefix</td><td id="v6-net" class="res-value">-</td></tr>
+            <tr><td class="res-label">Reverse DNS (PTR)</td><td id="v6-ptr" class="res-value">-</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-section">
+      <h2 class="section-title"><span>◈</span> IPv4 to IPv6 Conversion</h2>
+      <div class="calc-container">
+        <div class="card">
+          <div class="input-group">
+            <label>IPv4 Input</label>
+            <input type="text" id="conv-ip" value="192.168.1.1" oninput="calculateAll()">
+          </div>
+        </div>
+        <div class="card">
+          <table class="results-table">
+            <tr><td class="res-label">IPv4-Mapped</td><td id="conv-mapped" class="res-value">-</td></tr>
+            <tr><td class="res-label">IPv4-Compatible</td><td id="conv-compat" class="res-value">-</td></tr>
+            <tr><td class="res-label">Hexadecimal</td><td id="conv-hex" class="res-value">-</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Setup CIDR dropdowns
+    const cidrSelect = document.getElementById('cidr');
+    for (let i = 32; i >= 1; i--) {
+      const mask = Array(4).fill(0).map((_, j) => {
+        const bits = Math.min(Math.max(i - j * 8, 0), 8);
+        return 256 - Math.pow(2, 8 - bits);
+      }).join('.');
+      const opt = document.createElement('option');
+      opt.value = i; opt.text = `/${i} (${mask})`;
+      if (i === 24) opt.selected = true;
+      cidrSelect.appendChild(opt);
+    }
+
+    const v6PrefixSelect = document.getElementById('v6-prefix');
+    for (let i = 128; i >= 0; i--) {
+      const opt = document.createElement('option');
+      opt.value = i; opt.text = `/${i}`;
+      if (i === 64) opt.selected = true;
+      v6PrefixSelect.appendChild(opt);
+    }
+
+    function calculateAll() {
+      calcV4();
+      calcV6();
+      calcConv();
+    }
+
+    function calcV4() {
+      const ip = document.getElementById('ip-address').value;
+      const cidr = parseInt(cidrSelect.value);
+      const parts = ip.split('.').map(Number);
+      if (parts.length !== 4 || parts.some(p => isNaN(p) || p < 0 || p > 255)) return;
+
+      const ipNum = (parts[0] << 24 | parts[1] << 16 | parts[2] << 8 | parts[3]) >>> 0;
+      const maskNum = (0xFFFFFFFF << (32 - cidr)) >>> 0;
+      const netNum = (ipNum & maskNum) >>> 0;
+      const broadNum = (netNum | ~maskNum) >>> 0;
+
+      document.getElementById('net-addr').textContent = numToIp(netNum);
+      document.getElementById('broad-addr').textContent = numToIp(broadNum);
+      document.getElementById('total-hosts').textContent = (cidr >= 31 ? 0 : Math.pow(2, 32 - cidr) - 2).toLocaleString();
+      document.getElementById('ip-range').textContent = cidr <= 30 ? `${numToIp(netNum+1)} - ${numToIp(broadNum-1)}` : "N/A";
+      document.getElementById('wildcard').textContent = numToIp(~maskNum >>> 0);
+      document.getElementById('v4-ptr').textContent = parts.slice().reverse().join('.') + ".in-addr.arpa.";
+      document.getElementById('binary-net').textContent = `Binary: ${netNum.toString(2).padStart(32, '0').match(/.{8}/g).join('.')}`;
+    }
+
+    function calcV6() {
+      const addr = document.getElementById('ipv6-address').value.trim();
+      const prefix = parseInt(v6PrefixSelect.value);
+      const expanded = expandIPv6(addr);
+      if (!expanded) return;
+
+      const hex = expanded.replace(/:/g, '');
+      const ptr = hex.split('').reverse().join('.') + ".ip6.arpa.";
+      
+      document.getElementById('v6-compressed').textContent = compressIPv6(expanded);
+      document.getElementById('v6-ptr').textContent = ptr;
+      
+      const words = expanded.split(':').map(x => parseInt(x, 16));
+      const netWords = words.map((w, i) => {
+        const offset = i * 16;
+        const mask = prefix <= offset ? 0 : (prefix >= offset + 16 ? 0xFFFF : (0xFFFF << (16 - (prefix - offset))) & 0xFFFF);
+        return (w & mask).toString(16).padStart(1, '0');
+      });
+      document.getElementById('v6-net').textContent = compressIPv6(netWords.join(':')) + "/" + prefix;
+    }
+
+    function calcConv() {
+      const ip = document.getElementById('conv-ip').value;
+      const parts = ip.split('.').map(Number);
+      if (parts.length === 4 && !parts.some(isNaN) && !parts.some(p => p < 0 || p > 255)) {
+        const hexArr = parts.map(p => p.toString(16).padStart(2, '0'));
+        const high = hexArr[0] + hexArr[1];
+        const low = hexArr[2] + hexArr[3];
+
+        document.getElementById('conv-mapped').textContent = `::ffff:${ip}`;
+        document.getElementById('conv-compat').textContent = `::${ip}`;
+        document.getElementById('conv-hex').textContent = `::ffff:${high}:${low}`;
+      }
+    }
+
+    function numToIp(num) { return [(num >>> 24) & 0xFF, (num >>> 16) & 0xFF, (num >>> 8) & 0xFF, num & 0xFF].join('.'); }
+    
+    function expandIPv6(addr) {
+      if (!addr.includes(':')) return null;
+      let full = addr;
+      if (addr.includes('::')) {
+        const parts = addr.split('::');
+        const left = parts[0] ? parts[0].split(':') : [];
+        const right = parts[1] ? parts[1].split(':') : [];
+        full = [...left, ...Array(8 - (left.length + right.length)).fill('0'), ...right].join(':');
+      }
+      const exploded = full.split(':');
+      if (exploded.length !== 8) return null;
+      return exploded.map(x => x.padStart(4, '0')).join(':');
+    }
+
+    function compressIPv6(addr) { return addr.replace(/\b0+/g, '').replace(/:{2,}/, '::').replace(/:$/, ':0').replace(/^:/, '0:'); }
+
+    calculateAll();
+  </script>
+</body>
+</html>

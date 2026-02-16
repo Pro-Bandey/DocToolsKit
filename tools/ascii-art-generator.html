@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<!-- Copyright (c) 2025 BLGardner. All Rights Reserved. -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCII Art Generator - Prism.Tools</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0f;
+      color: #e4e4e7;
+      line-height: 1.4;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+    .navbar {
+      background: rgba(10, 10, 15, 0.98);
+      backdrop-filter: blur(12px);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #27272a;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #50FA7B 0%, #8BE9FD 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    .back-link {
+      color: #a1a1aa;
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #e4e4e7; }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+	.donate-btn {
+      padding: 0.4rem 1rem;
+      background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: transform 0.2s;
+      white-space: nowrap;
+    }    
+    .donate-btn:hover { transform: translateY(-1px); }
+    
+    .header {
+      text-align: center;
+      padding: 1.5rem 0 1rem;
+    }
+    .header h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.25rem;
+      color: #50FA7B;
+    }
+    .header p {
+      color: #a1a1aa;
+      font-size: 0.875rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+    .tab {
+      padding: 0.625rem 1.25rem;
+      background: rgba(80, 250, 123, 0.1);
+      border: 1px solid rgba(80, 250, 123, 0.3);
+      color: #50FA7B;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .tab:hover {
+      background: rgba(80, 250, 123, 0.2);
+    }
+    .tab.active {
+      background: #50FA7B;
+      color: #0a0a0f;
+      border-color: #50FA7B;
+    }
+    .mode-section {
+      display: none;
+    }
+    .mode-section.active {
+      display: block;
+    }
+    .upload-section {
+      background: #18181b;
+      border: 2px dashed #27272a;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    .upload-section:hover {
+      border-color: #50FA7B;
+      background: rgba(80, 250, 123, 0.05);
+    }
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    .upload-text {
+      font-size: 1rem;
+      color: #e4e4e7;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .text-input-section {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .text-input-section textarea {
+      width: 100%;
+      padding: 1rem;
+      background: #0a0a0f;
+      border: 1px solid #27272a;
+      border-radius: 6px;
+      color: #e4e4e7;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      resize: none;
+      font-family: 'Courier New', monospace;
+    }
+    .text-input-section textarea:focus {
+      outline: none;
+      border-color: #50FA7B;
+    }
+    .controls {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .control-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #a1a1aa;
+    }
+    select, input[type="number"] {
+      padding: 0.5rem 0.75rem;
+      background: #0a0a0f;
+      border: 1px solid #27272a;
+      border-radius: 6px;
+      color: #e4e4e7;
+      font-size: 0.85rem;
+    }
+    select:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #50FA7B;
+    }
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #50FA7B;
+    }
+    .checkbox-label {
+      font-size: 0.85rem;
+      color: #e4e4e7;
+      cursor: pointer;
+    }
+    .output-panel {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .output-header {
+      background: #1f1f23;
+      padding: 0.75rem 0.875rem;
+      border-bottom: 1px solid #27272a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #50FA7B;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .output-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .btn-small {
+      padding: 0.25rem 0.625rem;
+      background: rgba(80, 250, 123, 0.1);
+      border: 1px solid rgba(80, 250, 123, 0.3);
+      color: #50FA7B;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+    .btn-small:hover {
+      background: rgba(80, 250, 123, 0.2);
+    }
+    .btn-small:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .output-content {
+      padding: 1rem;
+      background: #0a0a0f;
+      overflow-x: auto;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .ascii-output {
+      font-family: 'Courier New', monospace;
+      font-size: 0.625rem;
+      line-height: 0.625rem;
+      white-space: pre;
+      color: #50FA7B;
+      letter-spacing: 0;
+    }
+    .btn {
+      padding: 0.625rem 1.25rem;
+      background: #50FA7B;
+      color: #0a0a0f;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(80, 250, 123, 0.3);
+    }
+    canvas {
+      display: none;
+    }
+    .info-box {
+      background: rgba(80, 250, 123, 0.1);
+      border: 1px solid rgba(80, 250, 123, 0.2);
+      border-radius: 8px;
+      padding: 0.875rem;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #a1a1aa;
+      line-height: 1.5;
+    }
+    .animation-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .btn-animate {
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, #a78bfa 0%, #ec4899 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+    }
+    .btn-animate:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+    .btn-animate:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .loading {
+      opacity: 0.6;
+    }
+    .font-status {
+      font-size: 0.75rem;
+      color: #a1a1aa;
+      margin-top: 0.25rem;
+    }
+  </style>
+  
+  <script src="../lib/figlet-1.7.0.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+    <a href="../index.html" class="logo">PRISM.TOOLS</a>
+    <a href="https://www.paypal.com/paypalme/BLGApps" target="_blank" class="donate-btn">☕ Donate</a>
+    <a href="../index.html" class="back-link">← All Tools</a>
+  </nav>
+
+  <div class="container">
+    <div class="header">
+      <h1>🎨 ASCII Art Generator</h1>
+      <p>Convert images and text to ASCII art - Powered by Figlet.js (MIT License)</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchMode('image')" id="tab-image">From Image</button>
+      <button class="tab" onclick="switchMode('text')" id="tab-text">From Text</button>
+    </div>
+
+    <div id="mode-image" class="mode-section active">
+      <div class="upload-section" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text">Click to upload image</div>
+        <input type="file" id="file-input" accept="image/*">
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <label class="control-label">Width (characters)</label>
+          <input type="number" id="img-width" min="20" max="200" value="100">
+        </div>
+        <div class="control-group">
+          <label class="control-label">Character Set</label>
+          <select id="img-charset">
+            <option value="standard">Standard: @%#*+=-:. </option>
+            <option value="detailed">Detailed:  .:-i|_?7EGTK9%QWBM@ </option>
+            <option value="blocks">Blocks: █▓▒░ </option>
+            <option value="simple">Simple: #*. </option>
+          </select>
+        </div>
+        <div class="control-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="img-invert" checked>
+            <label class="checkbox-label" for="img-invert">Invert colors</label>
+          </div>
+        </div>
+        <div class="control-group">
+          <button class="btn" onclick="generateFromImage()">Generate ASCII</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="mode-text" class="mode-section">
+      <div class="text-input-section">
+        <textarea id="text-input" rows="3" maxlength="20" placeholder="ASCII">ASCII</textarea>
+      </div>
+
+      <div class="controls">
+        <div class="control-group">
+          <label class="control-label">Font Style</label>
+          <select id="text-font">
+            <option value="Standard">Standard</option>
+            <option value="Banner">Banner</option>
+            <option value="Small">Small</option>
+            <option value="Block">Block</option>
+            <option value="Slant">Slant</option>
+            <option value="Doom">Doom</option>
+            <option value="Big">Big</option>
+            <option value="3D">3D</option>
+            <option value="Delta Corps Priest 1">Delta Corps Priest 1</option>
+          </select>
+          <div class="font-status" id="font-status">Fonts loading...</div>
+        </div>
+        <div class="control-group">
+          <button class="btn" onclick="generateFromText()">Generate ASCII</button>
+        </div>
+        <div class="animation-controls">
+          <button class="btn-animate" id="animate-btn" onclick="toggleAnimation()" disabled>🎬 Animate</button>
+          <button class="btn-animate" onclick="stopAnimation()" disabled>⏹️ Stop</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-panel">
+      <div class="output-header">
+        <span class="output-title">ASCII Output</span>
+        <div class="output-actions">
+          <button class="btn-small" onclick="copyAscii(event)">📋 Copy</button>
+          <button class="btn-small" onclick="downloadAscii()">💾 Download</button>
+        </div>
+      </div>
+      <div class="output-content">
+        <pre class="ascii-output" id="ascii-output">Upload an image or enter text to generate ASCII art...</pre>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>💡 Tips:</strong> For best results with images, use high-contrast photos with clear subjects. Smaller width values create more abstract art, while larger values preserve more detail. Text mode uses Figlet.js for professional ASCII fonts. Try the Animate button for dynamic effects!
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <script>
+    let currentMode = 'image';
+    let animationInterval = null;
+    let isAnimating = false;
+    let currentText = '';
+    let animationFonts = ['Banner', 'Slant', 'Block', 'Doom', 'Standard', 'Big', '3D', 'Delta Corps Priest 1', 'Small'];
+
+    const charsets = {
+      standard: '@%#*+=-:. ',
+      detailed: ' .:-i|_?7EGTK9%QWBM@',
+      blocks: '█▓▒░ ',
+      simple: '#*. '
+    };
+
+    // Font mapping for Figlet.js
+    const fontMapping = {
+      'Standard': 'Standard',
+      'Banner': 'Banner',
+      'Small': 'Small',
+      'Block': 'Block',
+      'Slant': 'Slant',
+      'Doom': 'Doom',
+      'Big': 'Big',
+      '3D': '3D',
+      'Delta Corps Priest 1': 'Delta Corps Priest 1'
+    };
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(`tab-${mode}`).classList.add('active');
+      document.querySelectorAll('.mode-section').forEach(s => s.classList.remove('active'));
+      document.getElementById(`mode-${mode}`).classList.add('active');
+      
+      if (mode === 'text' && typeof figlet !== 'undefined') {
+        checkFonts();
+      }
+    }
+
+    // Check if Figlet is loaded and fonts are available
+    function checkFonts() {
+      if (typeof figlet === 'undefined') {
+        document.getElementById('font-status').textContent = 'Loading...';
+        document.getElementById('animate-btn').disabled = true;
+        return;
+      }
+
+      document.getElementById('font-status').textContent = 'Ready! Fonts: Standard, Banner, Small, Block, Slant, Doom, Big, 3D, Delta Corps Priest 1';
+      document.getElementById('animate-btn').disabled = false;
+    }
+
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            generateFromImage(img);
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function generateFromImage(img) {
+      if (typeof img === 'undefined' && !window.lastImage) {
+        alert('Please upload an image first');
+        return;
+      }
+
+      if (img) window.lastImage = img;
+      img = window.lastImage || img;
+
+      const width = parseInt(document.getElementById('img-width').value);
+      const charsetType = document.getElementById('img-charset').value;
+      let charset = charsets[charsetType].split('');
+      const invert = document.getElementById('img-invert').checked;
+
+      // Sort charset by density for better detail
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 10;
+      canvas.height = 10;
+      ctx.font = '10px monospace';
+      ctx.textBaseline = 'top';
+
+      const densities = charset.map(char => {
+        ctx.clearRect(0, 0, 10, 10);
+        ctx.fillStyle = 'black';
+        ctx.fillText(char, 0, 0);
+        const data = ctx.getImageData(0, 0, 10, 10).data;
+        let count = 0;
+        for (let j = 0; j < data.length; j += 4) {
+          if (data[j] < 255 || data[j+1] < 255 || data[j+2] < 255) count++;
+        }
+        return {char, density: count / 100};
+      });
+
+      densities.sort((a, b) => a.density - b.density);
+      charset = densities.map(d => d.char);
+
+      const aspectRatio = img.height / img.width;
+      const height = Math.floor(width * aspectRatio * 0.5);
+
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.drawImage(img, 0, 0, width, height);
+      const imageData = ctx.getImageData(0, 0, width, height);
+
+      let ascii = '';
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const i = (y * width + x) * 4;
+          const r = imageData.data[i];
+          const g = imageData.data[i + 1];
+          const b = imageData.data[i + 2];
+          
+          const brightness = (r + g + b) / 3 / 255;
+          let charIndex = Math.floor(brightness * (charset.length - 1));
+          if (invert) charIndex = charset.length - 1 - charIndex;
+          ascii += charset[charIndex];
+        }
+        ascii += '\n';
+      }
+
+      document.getElementById('ascii-output').textContent = ascii;
+      trackUsage();
+    }
+
+    function generateFromText() {
+      const fontType = document.getElementById('text-font').value;
+      const text = document.getElementById('text-input').value.trim();
+
+      if (!text) {
+        alert('Please enter text');
+        return;
+      }
+
+      if (typeof figlet === 'undefined') {
+        alert('Library is still loading. Please wait a moment and try again.');
+        return;
+      }
+
+      const fontName = fontMapping[fontType] || 'Standard';
+      
+      // Show loading state
+      document.getElementById('ascii-output').classList.add('loading');
+      document.getElementById('ascii-output').textContent = 'Generating ASCII art...';
+
+      figlet.text(text, { 
+        font: fontName,
+        width: 80,
+        whitespace: false 
+      }, (err, ascii) => {
+        document.getElementById('ascii-output').classList.remove('loading');
+        if (err) {
+          console.error('Figlet error:', err);
+          document.getElementById('ascii-output').textContent = `Error loading font: ${fontName}\n\nFallback: ${text.toUpperCase()}`;
+        } else if (ascii) {
+          document.getElementById('ascii-output').textContent = ascii;
+          currentText = text;  // Store for animation
+        } else {
+          document.getElementById('ascii-output').textContent = 'No output generated.';
+        }
+        trackUsage();
+      });
+    }
+
+    function toggleAnimation() {
+      if (isAnimating) {
+        stopAnimation();
+      } else {
+        startAnimation();
+      }
+    }
+
+    function startAnimation() {
+      if (!currentText) {
+        alert('Generate static text first!');
+        return;
+      }
+
+      isAnimating = true;
+      document.getElementById('animate-btn').textContent = '⏸️ Pause';
+      document.getElementById('animate-btn').disabled = true;
+      document.getElementById('stop-btn').disabled = false;
+
+      let fontIndex = 0;
+      animationInterval = setInterval(() => {
+        const fontName = animationFonts[fontIndex % animationFonts.length];
+        figlet.text(currentText, { font: fontName }, (err, ascii) => {
+          if (!err && ascii) {
+            document.getElementById('ascii-output').textContent = ascii;
+          }
+        });
+        fontIndex++;
+      }, 800);  // 800ms per frame for smooth animation
+    }
+
+    function stopAnimation() {
+      isAnimating = false;
+      clearInterval(animationInterval);
+      animationInterval = null;
+      document.getElementById('animate-btn').textContent = '🎬 Animate';
+      document.getElementById('animate-btn').disabled = false;
+      document.getElementById('stop-btn').disabled = true;
+
+      // Regenerate the current static version
+      const fontType = document.getElementById('text-font').value;
+      generateFromText();  // This will use the current font setting
+    }
+
+    function copyAscii(event) {
+      const ascii = document.getElementById('ascii-output').textContent;
+      if (ascii.includes('Upload') || ascii.includes('Generating') || ascii.includes('Error')) {
+        alert('Generate ASCII art first');
+        return;
+      }
+      navigator.clipboard.writeText(ascii).then(() => {
+        const btn = event.target;
+        const original = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => { btn.textContent = original; }, 2000);
+      }).catch(err => {
+        console.error('Copy failed:', err);
+        alert('Copy failed. Please select and copy manually.');
+      });
+    }
+
+    function downloadAscii() {
+      const ascii = document.getElementById('ascii-output').textContent;
+      if (ascii.includes('Upload') || ascii.includes('Generating') || ascii.includes('Error')) {
+        alert('Generate ASCII art first');
+        return;
+      }
+      const blob = new Blob([ascii], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ascii-art-${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function trackUsage() {
+      let count = parseInt(localStorage.getItem('prism-usage-count') || '0');
+      count++;
+      localStorage.setItem('prism-usage-count', count);
+    }
+
+    // Auto-generate text on input (debounced to avoid too many calls)
+    let textTimeout;
+    document.getElementById('text-input').addEventListener('input', () => {
+      clearTimeout(textTimeout);
+      textTimeout = setTimeout(() => {
+        if (document.getElementById('text-input').value.trim() && typeof figlet !== 'undefined') {
+          generateFromText();
+        }
+      }, 500);  // 500ms debounce
+    });
+
+    document.getElementById('text-font').addEventListener('change', () => {
+      if (document.getElementById('text-input').value.trim() && typeof figlet !== 'undefined') {
+        generateFromText();
+      }
+    });
+
+    // Check if Figlet loaded when page loads
+    window.addEventListener('load', () => {
+      checkFonts();
+      
+      // Button references for animation
+      const stopBtn = document.querySelector('.btn-animate:last-child');
+      stopBtn.id = 'stop-btn';
+      stopBtn.disabled = true;
+    });
+
+    // Fallback if Figlet fails to load
+    if (typeof figlet === 'undefined') {
+      console.warn('Failed to load library. Text generation may not work.');
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('font-status').textContent = 'Library failed to load.';
+        document.getElementById('animate-btn').style.display = 'none';
+      });
+    }
+  </script>
+</body>
+</html>
